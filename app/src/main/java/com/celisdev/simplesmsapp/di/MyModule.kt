@@ -1,0 +1,21 @@
+package com.celisdev.simplesmsapp.di
+
+import android.content.Context
+import com.celisdev.simplesmsapp.data.SendSmsRepository
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+object MyModule {
+
+    @Singleton
+    @Provides
+    fun provideSendSmsRepo(@ApplicationContext context: Context): SendSmsRepository{
+        return SendSmsRepository(context)
+    }
+}

@@ -1,17 +1,10 @@
 package com.celisdev.simplesmsapp
 
 import android.Manifest
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
-import android.provider.Telephony
-import android.telephony.SmsMessage
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -21,18 +14,17 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.celisdev.simplesmsapp.data.SmsReceiver
-import com.celisdev.simplesmsapp.presentation.SmsScreen
+import com.celisdev.simplesmsapp.data.ReceiveSmsRepository
+import com.celisdev.simplesmsapp.presentation.home.SmsScreen
 import com.celisdev.simplesmsapp.presentation.SmsViewModel
 import com.celisdev.simplesmsapp.ui.theme.SimpleSMSAppTheme
 import com.celisdev.simplesmsapp.utils.Constants
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private lateinit var myReceiver: SmsReceiver
+    private lateinit var myReceiver: ReceiveSmsRepository
     private val viewModel: SmsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,7 +42,7 @@ class MainActivity : ComponentActivity() {
             ActivityCompat.requestPermissions(this, permissions, 1006)
         }
 
-        myReceiver = SmsReceiver(viewModel)
+        myReceiver = ReceiveSmsRepository(viewModel)
 
         val filter = IntentFilter("android.provider.Telephony.SMS_RECEIVED")
 
