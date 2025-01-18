@@ -29,7 +29,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchBar(
     modifier: Modifier = Modifier,
@@ -56,7 +56,7 @@ fun SearchBar(
                 shape = MaterialTheme.shapes.small,
                 placeholder = {
                     Text(
-                        text = "Buscar...",
+                        text = "Search...",
                         fontSize = 20.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

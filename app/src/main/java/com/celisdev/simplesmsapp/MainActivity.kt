@@ -14,7 +14,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.celisdev.simplesmsapp.data.ReceiveSmsRepository
+import com.celisdev.simplesmsapp.data.sms_repositories.ReceiveSmsRepository
 import com.celisdev.simplesmsapp.presentation.home.SmsScreen
 import com.celisdev.simplesmsapp.presentation.SmsViewModel
 import com.celisdev.simplesmsapp.ui.theme.SimpleSMSAppTheme

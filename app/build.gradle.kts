@@ -67,6 +67,15 @@ dependencies {
     kapt(libs.hilt.android.compiler)
     implementation (libs.androidx.hilt.navigation.compose)
 
+    // ROOM
+    val room_version = "2.6.1"
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx.v261)
+    kapt("androidx.room:room-compiler:$room_version")
+    implementation("androidx.room:room-paging:$room_version")
+
+    implementation(libs.androidx.lifecycle.runtime.compose)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

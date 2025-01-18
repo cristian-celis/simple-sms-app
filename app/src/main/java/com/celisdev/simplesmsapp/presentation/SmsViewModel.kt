@@ -1,23 +1,21 @@
 package com.celisdev.simplesmsapp.presentation
 
-import android.app.Activity
-import android.app.PendingIntent
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.os.Build
-import android.telephony.SmsManager
 import android.util.Log
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.celisdev.simplesmsapp.data.SendSmsRepository
+import com.celisdev.simplesmsapp.data.sms_repositories.LocalSmsRepository
+import com.celisdev.simplesmsapp.data.sms_repositories.SendSmsRepository
 import com.celisdev.simplesmsapp.domain.SmsModel
+import com.celisdev.simplesmsapp.domain.StatusSMS
+import com.celisdev.simplesmsapp.domain.toEntity
 import com.celisdev.simplesmsapp.utils.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -28,7 +26,8 @@ import javax.inject.Inject
 @HiltViewModel
 class SmsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val sendSmsRepository: SendSmsRepository
+    private val sendSmsRepository: SendSmsRepository,
+    private val localSmsRepository: LocalSmsRepository
 ) : ViewModel() {
 
     private val _sms = MutableStateFlow<SmsModel>(SmsModel("", "", null))
@@ -40,6 +39,9 @@ class SmsViewModel @Inject constructor(
     private val _messagesSearched = MutableStateFlow<List<SmsModel>?>(null)
     val messagesSearched: StateFlow<List<SmsModel>?> = _messagesSearched
 
+    private val _isReceivedMode = MutableStateFlow(true)
+    val isReceivedMode: StateFlow<Boolean> = _isReceivedMode
+
     private val _query = MutableStateFlow<String>("")
     val query: StateFlow<String> = _query
 
@@ -49,33 +51,70 @@ class SmsViewModel @Inject constructor(
     private val _showSmsDialog = MutableStateFlow(false)
     val showSmsDialog: StateFlow<Boolean> = _showSmsDialog
 
-    fun messageReceived(message: SmsModel) {
-        _dataFlow.value += message
+    init {
+        getAllReceivedSms()
+    }
+
+    fun messageReceived(sms: SmsModel) {
+        viewModelScope.launch {
+            localSmsRepository.insertSms(sms.copy(isSentOrReceived = StatusSMS.RECEIVED).toEntity())
+            Toast.makeText(context, "Message received", Toast.LENGTH_SHORT).show()
+            if (_isReceivedMode.value)
+                getAllReceivedSms()
+        }
     }
 
     fun searchMessage() {
-        val regex = Regex(_query.value, RegexOption.IGNORE_CASE)
-        _messagesSearched.value = _dataFlow.value.filter { item ->
-            regex.containsMatchIn(item.sender) || regex.containsMatchIn(item.messageBody)
+        viewModelScope.launch {
+            _messagesSearched.value = localSmsRepository.searchSms(_query.value)
+        }
+    }
+
+    fun getAllReceivedSms() {
+        viewModelScope.launch {
+            _dataFlow.value = localSmsRepository.getAllReceivedSms()
+        }
+    }
+
+    fun getAllSentSms() {
+        viewModelScope.launch {
+            _dataFlow.value = localSmsRepository.getAllSentSms()
         }
     }
 
     fun sendMessage() {
-        Log.d(Constants.TAG, "Message to be sent")
-            sendSmsRepository.sendSms(
-                sender = _sms.value.sender,
-                messageBody = _sms.value.messageBody,
-                onResult = {
-                    if (it) {
-                        Log.d(Constants.TAG, "Message sent successfully to ${_sms.value.sender}")
-                        Toast.makeText(context, "Message sent successfully to ${_sms.value.sender}", Toast.LENGTH_LONG).show()
-                        updateShowSmsDialog(false)
-                    } else {
-                        Log.e(Constants.TAG, "Failed to send message to ${_sms.value.sender}")
-                        Toast.makeText(context, "Failed to send message to ${_sms.value.sender}", Toast.LENGTH_LONG).show()
-                    }
+        sendSmsRepository.sendSms(
+            sender = _sms.value.sender,
+            messageBody = _sms.value.messageBody,
+            onResult = {
+                if (it) {
+                    Log.d(Constants.TAG, "Message sent successfully to ${_sms.value.sender}")
+                    Toast.makeText(
+                        context,
+                        "Message sent successfully to ${_sms.value.sender}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    updateShowSmsDialog(false)
+                } else {
+                    Log.e(Constants.TAG, "Failed to send message to ${_sms.value.sender}")
+                    Toast.makeText(
+                        context,
+                        "Failed to send message to ${_sms.value.sender}",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
+            }
+        )
+        viewModelScope.launch {
+            localSmsRepository.insertSms(
+                _sms.value.copy(
+                    timestamp = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) LocalTime.now() else null,
+                    isSentOrReceived = StatusSMS.SENT
+                ).toEntity()
             )
+            getAllSentSms()
+            updateIsReceivedMode(false)
+        }
     }
 
     fun updateQuery(query: String) {
@@ -103,8 +142,12 @@ class SmsViewModel @Inject constructor(
 
     fun updateShowSmsDialog(showSmsDialog: Boolean) {
         _showSmsDialog.value = showSmsDialog
-        if(!showSmsDialog){
+        if (!showSmsDialog) {
             _sms.value = SmsModel()
         }
+    }
+
+    fun updateIsReceivedMode(isReceivedMode: Boolean) {
+        _isReceivedMode.value = isReceivedMode
     }
 }

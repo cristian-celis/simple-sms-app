@@ -58,7 +58,7 @@ fun SmsDialog(modifier: Modifier = Modifier, viewModel: SmsViewModel) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
-                    .padding(16.dp)
+                    .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 5.dp)
             ) {
                 CustomOutlinedTextField(
                     value = sms.sender, label = "Phone number", keyboardOptions = KeyboardOptions(
@@ -69,7 +69,7 @@ fun SmsDialog(modifier: Modifier = Modifier, viewModel: SmsViewModel) {
                     viewModel.updateSender(newValue.filter { it.isDigit() })
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 CustomOutlinedTextField(
                     value = sms.messageBody,
@@ -79,7 +79,7 @@ fun SmsDialog(modifier: Modifier = Modifier, viewModel: SmsViewModel) {
                     viewModel.updateMessageBody(messageBody = it)
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(18.dp))
 
                 SendMessageButton(text = "Send SMS") {
                     if (sms.sender.isNotEmpty() && sms.messageBody.isNotEmpty()) {

@@ -1,4 +1,4 @@
-package com.celisdev.simplesmsapp.data
+package com.celisdev.simplesmsapp.data.sms_repositories
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -16,8 +16,7 @@ class ReceiveSmsRepository constructor(private val viewModel: SmsViewModel): Bro
 
     override fun onReceive(p0: Context?, p1: Intent?) {
         for (sms: SmsMessage in Telephony.Sms.Intents.getMessagesFromIntent(p1)) {
-            Log.d(Constants.TAG, "Sender: ${sms.originatingAddress}")
-            Log.d(Constants.TAG, "Message body: ${sms.messageBody}")
+            Log.d(Constants.TAG, "Message received -> Message body: ${sms.messageBody} - Sender: ${sms.originatingAddress}")
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 viewModel.messageReceived(SmsModel(sms.originatingAddress ?: "NN", sms.messageBody, LocalTime.now()))
             }else{

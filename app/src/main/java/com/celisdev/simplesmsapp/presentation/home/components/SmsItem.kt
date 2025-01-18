@@ -26,6 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.celisdev.simplesmsapp.domain.SmsModel
+import com.celisdev.simplesmsapp.domain.StatusSMS
 import com.celisdev.simplesmsapp.ui.theme.SimpleSMSAppTheme
 import java.time.Duration
 import java.time.LocalDateTime
@@ -33,7 +34,7 @@ import java.time.LocalDateTime
 @Composable
 fun SmsItem(sms: SmsModel) {
 
-    var isFullMessageShown by remember { mutableStateOf(sms.messageBody.length < 100) }
+    var isFullMessageShown by remember { mutableStateOf(sms.messageBody.length < 80) }
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         Icon(
@@ -48,16 +49,16 @@ fun SmsItem(sms: SmsModel) {
                 .weight(1f)
                 .padding(8.dp)
         ) {
-            Text(sms.sender, style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.W500))
+            Text("${if(sms.isSentOrReceived == StatusSMS.SENT) "To" else "From"} ${sms.sender}", style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.W500))
             Spacer(modifier = Modifier.height(4.dp))
             val messageBody =
-                if (isFullMessageShown) sms.messageBody else sms.messageBody.take(100) + "..."
+                if (isFullMessageShown) sms.messageBody else sms.messageBody.take(80) + " ..."
             Text(
                 messageBody,
                 style = TextStyle(color = MaterialTheme.colorScheme.outline, fontSize = 20.sp),
                 modifier = Modifier.clickable {
                     if (!isFullMessageShown) isFullMessageShown = true
-                    else if (sms.messageBody.length > 100)
+                    else if (sms.messageBody.length > 80)
                         isFullMessageShown = false
                 })
         }

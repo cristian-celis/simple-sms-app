@@ -1,4 +1,4 @@
-package com.celisdev.simplesmsapp.data
+package com.celisdev.simplesmsapp.data.sms_repositories
 
 import android.app.Activity
 import android.app.PendingIntent
