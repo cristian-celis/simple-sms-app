@@ -103,10 +103,14 @@ fun SmsScreen(viewModel: SmsViewModel) {
                 .background(Color.Transparent, MaterialTheme.shapes.small)
         ) {
             SectionBarItem(modifier = Modifier.weight(1f), isSelected = isReceivedMode, text = "Received") {
+                viewModel.updateQuery("")
+                viewModel.updateSearchMode(false)
                 viewModel.updateIsReceivedMode(true)
                 viewModel.getAllReceivedSms()
             }
             SectionBarItem(modifier = Modifier.weight(1f), isSelected = !isReceivedMode, text = "Sent") {
+                viewModel.updateQuery("")
+                viewModel.updateSearchMode(false)
                 viewModel.updateIsReceivedMode(false)
                 viewModel.getAllSentSms()
             }

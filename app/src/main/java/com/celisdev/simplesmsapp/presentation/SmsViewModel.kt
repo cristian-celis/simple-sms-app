@@ -67,6 +67,7 @@ class SmsViewModel @Inject constructor(
     fun searchMessage() {
         viewModelScope.launch {
             _messagesSearched.value = localSmsRepository.searchSms(_query.value)
+                .filter { it.isSentOrReceived == if (_isReceivedMode.value) StatusSMS.RECEIVED else StatusSMS.SENT }
         }
     }
 
